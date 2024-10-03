@@ -47,17 +47,17 @@ st.subheader('Estatísticas Descritivas')
 media = df_produtos['Total'].mean()
 mediana = df_produtos['Total'].median()
 st.write(f"Média: {media}, Mediana: {mediana}")
-st.write('Tendo em vista que a média e mediana são diferentes, a distribuição dos valores não é normal.')
-st.write('Abaixo as medidas estatisticas:')
+st.write('Tendo em vista que a média e a mediana são diferentes, a distribuição dos valores não é normal.')
+st.write('Abaixo, as medidas estatísticas:')
 st.write(df_produtos.describe())
 
 # Boxplot de Total por Categoria
 fig_box = px.box(df_produtos, x='Categoria', y='Total', title='Boxplot de Total por Categoria')
 st.plotly_chart(fig_box, key='box_plot_categoria')
-st.write('Com base no boxplot, podemos analisar que os produtos da Categoria Eletrônicos possuem maiores valores que em relação ao outras categorias, o que é justificavel considerando que esses produtos serão mais caros do que produtos alimenticios, vestuario, higiene ou material escolar    ')
-st.write('Além disso, sua distribuição possui uma leve assimetria positiva, ou seja, indicando que há maior variabilidade entre os dados com valores maiores que a mediana, os valores mais altos estão puxando a média para cima.')
-st.write('O que pode ser justificavel tendo em vista que há uma grande dispersão entre os valores dos produtos dessa categoria ')
-st.write('Outro ponto que pode-se observar no boxplot é que na Categoria Higiene temos um outlier, um valor que está além do limite superior')
+st.write('Com base no boxplot, podemos analisar que os produtos da Categoria Eletrônicos possuem maiores valores em relação às outras categorias, o que é justificável considerando que esses produtos são mais caros do que produtos alimentícios, vestuário, higiene ou material escolar.')
+st.write('Além disso, sua distribuição possui uma leve assimetria positiva, indicando que há maior variabilidade entre os dados com valores maiores que a mediana, ou seja, os valores mais altos estão puxando a média para cima.')
+st.write('Isso pode ser justificável tendo em vista que há uma grande dispersão entre os valores dos produtos dessa categoria.')
+st.write('Outro ponto a se observar no boxplot é que, na Categoria Higiene, temos um outlier, um valor que está além do limite superior.')
 
 # Cálculo dos outliers
 Q1 = df_produtos['Total'].quantile(0.25)
@@ -69,8 +69,7 @@ li = Q1 - 1.5 * IQR
 
 df_produtos['Outliers'] = np.where((df_produtos['Total'] > ls) | (df_produtos['Total'] < li), True, False)
 
-#Correlação
-
+# Correlação
 vestuario = df_produtos[df_produtos['Categoria'] == 'VESTUÁRIO']
 if not vestuario.empty:
     fig_scatter = px.scatter(vestuario, x='Quantidade', y='Total', 
@@ -82,17 +81,16 @@ correlacaoTotal = df_produtos['Quantidade'].corr(df_produtos['Total'])
 st.write(f"Correlação entre Quantidade e Total: {correlacaoTotal:.2f}")
 st.write("É uma correlação inversamente proporcional; quando as quantidades aumentam, o valor do estoque diminui. Isso indica que, na maioria das vezes, há mais produtos com preços menores.")
 
-
 # Exibir outliers
 st.subheader('Outliers')
-st.write('Para a seleção de Outliers, primeiro foi realizado o entendimento do tipo de distribuição para entender de que forma seriam selecionados os Outliers')
-st.write('Com base em Histograma e tendo em vista que a média e mediana possuiam valores muito discrepantes, foi entendido se tratar de uma distribuição não normal')
+st.write('Para a seleção de Outliers, foi realizado o entendimento do tipo de distribuição para determinar como seriam identificados.')
+st.write('Com base no histograma e observando que a média e a mediana possuem valores muito discrepantes, concluiu-se que se trata de uma distribuição não normal.')
 st.write('Dessa forma, foi calculado o IQR (Q3 - Q1) para determinar os limites inferior (Q1 - 1.5 * IQR) e superior (Q3 + 1.5 * IQR). Os valores que estavam fora desses limites foram marcados como True para futura identificação.')
 st.write(df_produtos[df_produtos['Outliers'] == True])
-st.write('Os produtos identificados como Outliers são todos da Categoria Eletrônicos, o que faz sentido tendo em vista que esses produtos possuem valores bem maiores que os demais')
+st.write('Os produtos identificados como Outliers são todos da Categoria Eletrônicos, o que faz sentido, já que esses produtos possuem valores bem maiores que os demais.')
 
 not_outliers = df_produtos[df_produtos['Outliers'] == False]
-# Cálculo dos outliers
+# Cálculo dos outliers sem eletrônicos
 Q1 = not_outliers['Total'].quantile(0.25)
 Q3 = not_outliers['Total'].quantile(0.75)
 IQR = Q3 - Q1
@@ -102,16 +100,14 @@ li = Q1 - 1.5 * IQR
 
 not_outliers['Outlier'] = np.where((not_outliers['Total'] > ls) | (not_outliers['Total'] < li), True, False)
 
-st.subheader('Outliers - Outra seleção')
-st.write('Tendo em vista que os Eletrônicos possuem os maiores valores entre os demais produtos, esses foram retirados da seleção para analisar os possíveis outliers')
-st.write('Novamente foi calculado o IQR (Q3 - Q1) para determinar os limites inferior (Q1 - 1.5 * IQR) e superior (Q3 + 1.5 * IQR). Os valores que estavam fora desses limites foram marcados como True para futura identificação.')
+st.subheader('Outliers - Outra Seleção')
+st.write('Considerando que os Eletrônicos possuem os maiores valores entre os produtos, eles foram retirados da seleção para analisar outros possíveis outliers.')
+st.write('Novamente, foi calculado o IQR (Q3 - Q1) para determinar os limites inferior (Q1 - 1.5 * IQR) e superior (Q3 + 1.5 * IQR). Os valores que estavam fora desses limites foram marcados como True para futura identificação.')
 st.write(not_outliers[not_outliers['Outlier'] == True])
-st.write('Dessa vez, os produtos que caíram na seleção de outliers são o Sapato e Perfume.')
-st.write('Conforme análise de correlação, vimos que a quantidade de unidades aumenta enquanto o valor caí para o estoque, o que não é visualizado no caso do Sapato, em relação aos demais produtos de sua mesma categoria, o mesmo possui um valor elevado e uma quantidade elevada no estoque, o que pode ser visto como um erro ao analisar o comportamento do estoque como um todo.')
-st.write('No que diz respeito ao perfume, observamos um comportamento distinto em comparação aos outros produtos. Embora este item tenha a menor quantidade em estoque dentro da sua categoria, seu preço elevado de 100 se destaca significativamente, especialmente quando consideramos que os preços típicos dessa categoria variam entre 3 e 25. Essa disparidade de preço sugere que o perfume pode ser inicialmente classificado como um possível outlier. No entanto, ao considerar que ele é um produto premium no mercado e apresenta um valor que, embora elevado, é justificável pela sua qualidade e posicionamento, concluímos que não deve ser tratado como um outlier verdadeiro. Portanto, sua exclusão do grupo de outliers é fundamentada e razoável.')
+st.write('Dessa vez, os produtos que caíram na seleção de outliers foram o Sapato e o Perfume.')
+st.write('Conforme análise de correlação, vimos que a quantidade de unidades aumenta enquanto o valor cai para o estoque, o que não ocorre no caso do Sapato, que apresenta um valor elevado e alta quantidade no estoque. Isso pode ser visto como um erro ao analisar o comportamento do estoque como um todo.')
+st.write('No caso do Perfume, observamos que, embora tenha a menor quantidade em estoque dentro da sua categoria, seu preço elevado (R$ 100) se destaca significativamente. Essa disparidade de preço pode sugerir que o Perfume seja um possível outlier, mas, ao considerar que é um produto premium no mercado, concluímos que ele não deve ser tratado como um outlier verdadeiro.')
 
-
-# Multiselect para categorias
 # Multiselect para categorias
 st.subheader('Filtrar Produtos por Categoria')
 dados = df_produtos.Categoria.unique().tolist()
@@ -124,5 +120,3 @@ if lista:
     st.bar_chart(df_filtrado.set_index('Produto')['Total'])
 else:
     st.write("Nenhuma categoria selecionada.")
-
-
